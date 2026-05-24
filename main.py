@@ -2,9 +2,6 @@ import sys
 import aiohttp
 import asyncio
 from loguru import logger
-from win32comext.shell.demos.servers.folder_view import tasks
-
-from tixing.ccxt_test import fetch_klines
 
 logger.add(sys.stdout, colorize=True, format="<g>{time:HH:mm:ss:SSS}</g> | <level>{message}</level>")
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
