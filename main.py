@@ -2,6 +2,7 @@ import sys
 import aiohttp
 import asyncio
 from loguru import logger
+from database import MYSQLDB
 
 logger.add(sys.stdout, colorize=True, format="<g>{time:HH:mm:ss:SSS}</g> | <level>{message}</level>")
 asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -81,19 +82,19 @@ class ROSE:
             oi_task = asyncio.create_task(self.fetch_OI(symbol))
             kline = await kline_task
             oi = await oi_task
-            return {
-                "symbol": symbol,
-                "kline": kline,
-                "oi": oi
-            }
+            kline['exchange'] = "binance"
+            kline['oi'] = oi if oi else 0
+
+            return kline
 
 #------------运行函数------------
 async def main():
+    db = MYSQLDB()
     async with ROSE() as rose:
         symbols = await rose.fetch_symbols()
         tasks = [asyncio.create_task(rose.fetch_all(symbol)) for symbol in symbols]
         data = await asyncio.gather(*tasks)
-        print(data)
+        db.insert_many(data)
         # if not isinstance(data, list):
         #     return None
         # if len(data) < 2:
